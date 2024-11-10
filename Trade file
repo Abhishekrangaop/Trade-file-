@@ -1,0 +1,109 @@
+// Simulated Demat Account (local storage for user portfolio)
+let dematAccount = {
+    "user1": {
+        "AAPL": 10,
+        "GOOGL": 15
+    }
+};
+
+// Function to add stock to user's portfolio
+function addStock(user, stock, quantity) {
+    if (dematAccount[user]) {
+        if (dematAccount[user][stock]) {
+            dematAccount[user][stock] += quantity;
+        } else {
+            dematAccount[user][stock] = quantity;
+        }
+    } else {
+        dematAccount[user] = { [stock]: quantity };
+    }
+}
+
+// Simulated ETF Data Fetch (replace with actual API fetch in production)
+let etfApiUrl = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=SPY&apikey=YOUR_API_KEY`;
+
+// Fetch ETF data (example for SPY ETF)
+function fetchETFData() {
+    fetch(etfApiUrl)
+        .then(response => response.json())
+        .then(data => {
+            let etfPrice = data["Time Series (Daily)"]["2024-11-09"]["4. close"];
+            console.log("Current ETF Price:", etfPrice);
+        })
+        .catch(error => console.log("Error fetching ETF data:", error));
+}
+
+// Stocks and their market cap (Example for Mid-Cap and Large-Cap categorization)
+let stocks = [
+    { "symbol": "AAPL", "marketCap": 2200000 },  // Large-Cap
+    { "symbol": "GOOGL", "marketCap": 1800000 }, // Large-Cap
+    { "symbol": "MSM", "marketCap": 8000 },      // Mid-Cap
+    { "symbol": "INFY", "marketCap": 50000 }     // Mid-Cap
+];
+
+// Filter Mid-Cap Stocks (market cap between 5000 crore to 20000 crore)
+let midCapStocks = stocks.filter(stock => stock.marketCap >= 5000 && stock.marketCap <= 20000);
+
+// Filter Large-Cap Stocks (market cap above 20000 crore)
+let largeCapStocks = stocks.filter(stock => stock.marketCap > 20000);
+
+console.log("Mid-Cap Stocks:", midCapStocks);
+console.log("Large-Cap Stocks:", largeCapStocks);
+
+// Portfolio Example (user's portfolio)
+let portfolio = {
+    "AAPL": { "quantity": 10, "purchasePrice": 150 },
+    "GOOGL": { "quantity": 15, "purchasePrice": 1700 }
+};
+
+// Calculate portfolio value
+function calculatePortfolioValue(portfolio) {
+    let totalValue = 0;
+    for (let stock in portfolio) {
+        let currentPrice = getStockPrice(stock); // Function to get current stock price
+        totalValue += currentPrice * portfolio[stock].quantity;
+    }
+    return totalValue;
+}
+
+// Simulating the stock price fetching (this can be replaced with live API data)
+function getStockPrice(stock) {
+    // Sample stock prices (In real case, fetch from API)
+    let stockPrices = { "AAPL": 175, "GOOGL": 1780 };
+    return stockPrices[stock] || 0;
+}
+
+// Display Portfolio value
+console.log("Total Portfolio Value: ₹", calculatePortfolioValue(portfolio));
+
+// Function to track stock price and update the price
+let stockApiUrl = `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=GOOGL&interval=5min&apikey=YOUR_API_KEY`;
+
+// Fetch Google stock data
+function fetchGoogleStockPrice() {
+    fetch(stockApiUrl)
+        .then(response => response.json())
+        .then(data => {
+            let lastRefreshed = data["Meta Data"]["3. Last Refreshed"];
+            let googleStockPrice = data["Time Series (5min)"][lastRefreshed]["4. close"];
+            console.log(`Google Stock Price: $${googleStockPrice}`);
+            console.log("Last Updated:", lastRefreshed);
+        })
+        .catch(error => console.log("Error fetching stock price:", error));
+}
+
+// Simulate buying a stock (Adding a stock to the portfolio)
+function buyStock(user, stock, quantity, price) {
+    let totalCost = quantity * price;
+    console.log(`${user} bought ${quantity} shares of ${stock} for ₹${totalCost}`);
+    addStock(user, stock, quantity);
+}
+
+// Run ETF data fetching
+fetchETFData();
+
+// Run Google stock price tracking
+fetchGoogleStockPrice();
+
+// Simulate buying stock for user1
+buyStock("user1", "GOOGL", 5, 1750);
